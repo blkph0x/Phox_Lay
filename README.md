@@ -10,10 +10,11 @@ This project is a DirectX 11-based DLL hook using ImGui for creating an overlay.
 - Basic ImGui elements (text, button, slider)
 
 ## Prerequisites
-- Visual Studio 2022
+- STEAM overlay
+- Visual Studio 2019
 - DirectX 11 SDK
 - ImGui library
-- A target application with DirectX 11 support
+- A target application with DirectX 11 support (STEAM launched games using the STEAM overlay)
 
 ## Building the Project
 1. Clone the repository:
