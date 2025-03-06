@@ -1,4 +1,4 @@
-# ImGui DirectX 11 DLL Hook
+# STEAM overlay ImGui DirectX 11 DLL Hook
 
 ## Overview
 This project is a DirectX 11-based DLL hook using ImGui for creating an overlay. The overlay can be toggled using the `Home` key and currently demonstrates ImGui features like text, sliders, and buttons. It is designed to be injected into a target application using the Steam overlay.
