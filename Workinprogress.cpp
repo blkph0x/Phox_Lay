@@ -88,8 +88,6 @@ void InitImGui11(IDXGISwapChain* pSwapChain) {
 void RenderOverlay11() {
     if (!overlayInitialized || !pContext || !g_mainRenderTargetView) return;
     pContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
-    float clearColor[4] = { 0.f, 0.f, 0.f, 1.0f };
-    //pContext->ClearRenderTargetView(g_mainRenderTargetView, clearColor);
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
@@ -122,7 +120,6 @@ HRESULT APIENTRY HKPresent11(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT
     return oPresent11 ? oPresent11(pSwapChain, SyncInterval, Flags) : S_OK;
 }
 
-// RotateAESKey implementation
 void RotateAESKey() {
     BCRYPT_ALG_HANDLE hAlg = nullptr;
     if (BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_RNG_ALGORITHM, nullptr, 0) == 0) {
@@ -132,7 +129,6 @@ void RotateAESKey() {
     }
 }
 
-// MainThread implementation
 DWORD WINAPI MainThread(LPVOID lpReserved) {
     Log("MainThread executing");
     HMODULE hSteam = GetModuleHandleA("GameOverlayRenderer64.dll");
@@ -168,18 +164,28 @@ DWORD WINAPI MainThread(LPVOID lpReserved) {
     return FALSE;
 }
 
+void WipePEHeader() {
+    HMODULE hModule = GetModuleHandle(nullptr);
+    DWORD oldProtect;
+    if (VirtualProtect(hModule, 4096, PAGE_EXECUTE_READWRITE, &oldProtect)) {
+        ZeroMemory(hModule, 4096);
+        VirtualProtect(hModule, 4096, oldProtect, &oldProtect);
+    }
+}
+
 BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved) {
     Log("DllMain called");
-    // Commented for debug stability
-    // if (IsDebuggerPresent()) ExitProcess(0);
 
     if (dwReason == DLL_PROCESS_ATTACH) {
         DisableThreadLibraryCalls(hModule);
-        // WipePEHeader(); // Temporarily disabled for stability during testing
-        RotateAESKey();
+        // Hardened features are now delayed into thread startup for stability
 
         CreateThread(nullptr, 0, [](LPVOID) -> DWORD {
-            Sleep(3000); // Delay to avoid early initialization issues
+            Log("Thread startup...");
+            Sleep(3000);
+            if (IsDebuggerPresent()) ExitProcess(0);
+            RotateAESKey();
+            WipePEHeader();
             return MainThread(nullptr);
             }, nullptr, 0, nullptr);
     }
